@@ -1,0 +1,77 @@
+/* Custom futuristic glow effects */
+@layer utilities {
+  .glow-blue {
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+  }
+  
+  .glow-green {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+  }
+  
+  .glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(14, 165, 233, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(14, 165, 233, 0.5);
+  }
+}
+
+/* Leaflet map fixes - ensure proper z-index stacking */
+.leaflet-pane {
+  z-index: auto !important;
+}
+
+.leaflet-popup-pane {
+  z-index: 700 !important;
+}
+
+.leaflet-tooltip-pane {
+  z-index: 650 !important;
+}
+
+.leaflet-control {
+  z-index: 800 !important;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 800 !important;
+}
+
+/* Ensure map containers don't overflow their bounds */
+.leaflet-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Custom popup styling */
+.leaflet-popup-content-wrapper {
+  background-color: #0F1829 !important;
+  border: 1px solid #1E293B !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.leaflet-popup-tip {
+  background-color: #0F1829 !important;
+  border: 1px solid #1E293B !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  color: white;
+}
+
+.leaflet-popup-close-button {
+  color: #9CA3AF !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: white !important;
+}
