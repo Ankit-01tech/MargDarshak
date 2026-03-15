@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const Traffic = require("../models/Traffic");
+const createCsvWriter = require('csv-writer').createObjectCsvStringifier;
 
 // Import all data from your actual mockData.js
 const {
@@ -27,8 +29,22 @@ router.get('/dashboard-stats', (req, res) => {
  * 2. INDIVIDUAL ENDPOINTS
  * Required for the other pages in your project
  */
-router.get('/traffic', (req, res) => {
-    res.json(trafficData);
+router.get('/traffic', async (req, res) => {
+    try {
+        const traffic = await Traffic.find();
+        res.json(traffic);
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+router.post("/traffic", async (req,res)=>{
+  try{
+    const newTraffic = new Traffic(req.body);
+    await newTraffic.save();
+    res.json(newTraffic);
+  }catch(err){
+    res.status(500).json({error:err.message});
+  }
 });
 
 router.get('/vehicles', (req, res) => {
@@ -49,6 +65,33 @@ router.get('/deliveries', (req, res) => {
 
 router.get('/weather-climate', (req, res) => {
     res.json(weatherClimate);
+});
+
+router.get("/download-traffic-csv", async (req,res)=>{
+  try{
+
+    const data = await Traffic.find().lean();
+
+    const csvWriter = createCsvWriter({
+      header:[
+        {id:"location",title:"Location"},
+        {id:"vehicles",title:"Vehicles"},
+        {id:"congestionLevel",title:"Congestion"},
+        {id:"time",title:"Time"}
+      ]
+    });
+
+    const csv =
+      csvWriter.getHeaderString() +
+      csvWriter.stringifyRecords(data);
+
+    res.header("Content-Type","text/csv");
+    res.attachment("traffic-data.csv");
+    res.send(csv);
+
+  }catch(err){
+    res.status(500).json({error:err.message});
+  }
 });
 
 module.exports = router;
