@@ -13,33 +13,30 @@ export function DriverMobileApp() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDeliveries = async () => {
-      try {
-        // Calling your actual backend endpoint
-        // Change this line:
-const response = await fetch('http://localhost:8080/api/deliveries');
-        const data = await response.json();
+  const fetchDeliveries = async () => {
+    try {
+      const response = await fetch("https://margdarshak-3.onrender.com/api/deliveries");
+      const data = await response.json();
 
-        // Mapping your mockData.js fields to the UI
-        const mapped = data.map((d: any, index: number) => ({
-          ...d,
-          id: index + 1,
-          city: "Mumbai, MH",
-          // Syncing coordinates to Mumbai area
-          lat: 19.0760 + (index * 0.005), 
-          lng: 72.8777 + (index * 0.005),
-          eta: (index * 10 + 5) + " min",
-        }));
+      const mapped = data.map((d: any, index: number) => ({
+        ...d,
+        id: index + 1,
+        city: "Mumbai, MH",
+        lat: 19.076 + index * 0.005,
+        lng: 72.8777 + index * 0.005,
+        eta: index * 10 + 5 + " min",
+      }));
 
-        setDeliveries(mapped);
-        setLoading(false);
-      } catch (error) {
-        console.error('Fetch error:', error);
-        setLoading(false);
-      }
-    };
-    fetchDeliveries();
-  }, []);
+      setDeliveries(mapped);
+      setLoading(false);
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setLoading(false);
+    }
+  };
+
+  fetchDeliveries();
+}, []);
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current || deliveries.length === 0) return;
