@@ -14,7 +14,7 @@ export function WeatherClimateView() {
     const fetchWeatherClimate = async () => {
       try {
         // Updated to use the working Port 8080
-        const response = await fetch('http://localhost:8080/api/weather-climate');
+        const response = await fetch('https://margdarshak-3.onrender.com/api/weather-climate');
         const data = await response.json();
         
         // Mumbai coordinate offset to ensure they appear on the map

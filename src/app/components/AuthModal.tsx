@@ -30,7 +30,7 @@ export function AuthModal({ isOpen, onSuccess }: AuthModalProps) {
     setLoading(true);
     try {
       const endpoint = isSignup ? '/api/auth/signup' : '/api/auth/login';
-      const response = await fetch(`http://localhost:8080${endpoint}`, {
+      const response = await fetch(`https://margdarshak-3.onrender.com${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

@@ -75,7 +75,7 @@ export function DeliveryPriorityPanel() {
   useEffect(() => {
     const fetchDeliveries = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/deliveries');
+        const response = await fetch('https://margdarshak-3.onrender.com/api/auth/login');
         if (!response.ok) throw new Error('API Response Failed');
         const data = await response.json();
         

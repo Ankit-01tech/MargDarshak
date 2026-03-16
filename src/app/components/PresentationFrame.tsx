@@ -24,7 +24,7 @@ export function PresentationFrame() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/dashboard-stats');
+        const response = await fetch('https://margdarshak-3.onrender.com/api/stats');
         const data = await response.json();
         setStats(data.stats);
         setVehicles(data.vehicles || []);
