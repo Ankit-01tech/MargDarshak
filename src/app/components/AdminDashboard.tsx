@@ -22,7 +22,7 @@ export function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const BASE_URL = "https://margdarshak-3.onrender.com";
+        const BASE_URL = "https://margdarshak-4.onrender.com";
 
         const [trafficRes, vehiclesRes, statsRes] = await Promise.all([
           fetch(`${BASE_URL}/api/traffic`),

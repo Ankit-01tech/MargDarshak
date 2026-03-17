@@ -102,28 +102,30 @@ router.get("/download-activity-csv", (req, res) => {
 });
 
 /**
- * 4. DEMO RESET (CRITICAL FOR HACKATHON)
- * Purpose: Resets all orders to 'Pending' so you can repeat the demo.
+ * 4. DEMO RESET (The "Force-Fix" Version)
  * URL: https://margdarshak-4.onrender.com/api/demo/reset
  */
 router.get('/demo/reset', async (req, res) => {
     try {
-        // Reset all orders in MongoDB back to 'Pending'
-        await Delivery.updateMany({}, { status: 'Pending' });
+        // This ensures EVERY document gets the 'Pending' status
+        const result = await Delivery.updateMany({}, { 
+            $set: { status: 'Pending' } 
+        });
         
-        // Clear the in-memory activity logs
-        userActivityLogs = [];
+        userActivityLogs = []; // Clear the CSV logs
         
-        console.log("System Reset Performed.");
+        console.log(`Reset successful. Updated ${result.modifiedCount} orders.`);
+        
         res.status(200).send(`
-            <div style="font-family: sans-serif; padding: 40px; text-align: center; background: #0B0F1A; color: white; height: 100vh;">
-                <h1 style="color: #0EA5E9;">System Reset Successful</h1>
-                <p>All orders are back to Pending. Activity logs cleared.</p>
-                <button onclick="window.close()" style="background: #0EA5E9; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Close Tab</button>
+            <div style="font-family: sans-serif; padding: 40px; text-align: center; background: #0B0F1A; color: white; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <h1 style="color: #0EA5E9; font-size: 3rem;">🚀 System Re-Energized</h1>
+                <p style="font-size: 1.2rem; color: #94A3B8;">MongoDB updated: ${result.modifiedCount} orders are now Pending.</p>
+                <p style="color: #64748B;">Refresh your app to see the fleet return to action.</p>
+                <a href="https://margdarshak-ui.vercel.app" style="margin-top: 20px; text-decoration: none; background: #0EA5E9; color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold;">Back to App</a>
             </div>
         `);
     } catch (err) {
-        res.status(500).json({ error: "Reset failed" });
+        res.status(500).send("Reset failed: " + err.message);
     }
 });
 

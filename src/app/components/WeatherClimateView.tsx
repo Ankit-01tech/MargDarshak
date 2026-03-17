@@ -18,7 +18,7 @@ export function WeatherClimateView({ refreshKey }: WeatherProps) {
     const fetchWeatherClimate = async () => {
       try {
         // Fetching real Mumbai data from the corrected API
-        const response = await fetch('https://margdarshak-3.onrender.com/api/weather-climate');
+        const response = await fetch('https://margdarshak-4.onrender.com/api/weather-climate');
         const data = await response.json();
         
         // Mapped specifically to Mumbai regions like BKC, Colaba, Andheri

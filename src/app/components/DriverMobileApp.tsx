@@ -21,7 +21,7 @@ export function DriverMobileApp({ currentUser, onStatusChange }: DriverProps) {
   useEffect(() => {
     const fetchDeliveries = async () => {
       try {
-        const response = await fetch("https://margdarshak-3.onrender.com/api/deliveries");
+        const response = await fetch("https://margdarshak-4.onrender.com/api/deliveries");
         if (!response.ok) throw new Error("Failed to fetch");
         const data = await response.json();
 
@@ -82,7 +82,7 @@ export function DriverMobileApp({ currentUser, onStatusChange }: DriverProps) {
     try {
       console.log("Attempting to confirm:", current.orderId);
       
-      const response = await fetch("https://margdarshak-3.onrender.com/api/delivery/confirm", {
+      const response = await fetch("https://margdarshak-4.onrender.com/api/delivery/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 

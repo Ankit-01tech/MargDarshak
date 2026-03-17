@@ -1,4 +1,4 @@
-const API_URL = "https://margdarshak-3.onrender.com/api/traffic";
+const API_URL = "https://margdarshak-4.onrender.com/api/traffic";
 
 export async function getTrafficData() {
   try {

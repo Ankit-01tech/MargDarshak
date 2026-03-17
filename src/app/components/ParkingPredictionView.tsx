@@ -91,7 +91,7 @@ export function ParkingPredictionView() {
     const fetchParkingZones = async () => {
       try {
         const response = await fetch(
-          "https://margdarshak-3.onrender.com/api/parking-zones"
+          "https://margdarshak-4.onrender.com/api/parking-zones"
         );
         const rawData = await response.json();
 
