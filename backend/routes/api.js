@@ -3,17 +3,17 @@ const router = express.Router();
 const Delivery = require("../models/Delivery"); 
 const createCsvWriter = require('csv-writer').createObjectCsvStringifier;
 
-// Shared memory for activity logs (This captures your clicks!)
+// Shared memory for activity logs (Captures your clicks in real-time)
 let userActivityLogs = [];
 
 /**
  * 1. GET ALL PENDING DELIVERIES
- * This feeds your Priority Panel and Driver App.
+ * Purpose: Feeds the Priority Panel and Driver App.
  * URL: https://margdarshak-4.onrender.com/api/deliveries
  */
 router.get('/deliveries', async (req, res) => {
     try {
-        // We only fetch 'Pending' or 'In Transit' so the UI updates live
+        // Fetches orders that aren't 'Completed' to show live progress
         const data = await Delivery.find({ status: { $ne: 'Completed' } }); 
         res.status(200).json(data);
     } catch (err) {
@@ -24,7 +24,7 @@ router.get('/deliveries', async (req, res) => {
 
 /**
  * 2. CONFIRM ARRIVAL (The Sync Trigger)
- * This is called when you click the button in the Driver App.
+ * Purpose: Triggered by the "Confirm Arrival" button in Driver App.
  * URL: https://margdarshak-4.onrender.com/api/delivery/confirm
  */
 router.post('/delivery/confirm', async (req, res) => {
@@ -35,7 +35,7 @@ router.post('/delivery/confirm', async (req, res) => {
     }
 
     try {
-        // 1. Update the database status to 'Completed'
+        // 1. Update status in MongoDB
         const updated = await Delivery.findOneAndUpdate(
             { orderId: orderId }, 
             { status: 'Completed' },
@@ -43,7 +43,7 @@ router.post('/delivery/confirm', async (req, res) => {
         );
 
         if (!updated) {
-            return res.status(404).json({ error: "Order not found in MongoDB" });
+            return res.status(404).json({ error: "Order not found in Database" });
         }
 
         // 2. Log the activity for the CSV Export
@@ -55,8 +55,6 @@ router.post('/delivery/confirm', async (req, res) => {
         };
 
         userActivityLogs.push(logEntry);
-        
-        // This prints in your Render logs so you can see it working!
         console.log("Activity Captured:", logEntry);
 
         res.status(200).json({ 
@@ -72,7 +70,7 @@ router.post('/delivery/confirm', async (req, res) => {
 
 /**
  * 3. DOWNLOAD ACTIVITY CSV
- * Generates the audit trail of all your "Confirm Arrival" clicks.
+ * Purpose: Exports the audit trail of confirmed deliveries.
  * URL: https://margdarshak-4.onrender.com/api/download-activity-csv
  */
 router.get("/download-activity-csv", (req, res) => {
@@ -86,22 +84,46 @@ router.get("/download-activity-csv", (req, res) => {
             ]
         });
 
-        // Use recorded logs, or a placeholder if no one has clicked yet
+        // Use recorded logs, or a system placeholder if empty
         const records = userActivityLogs.length > 0 
             ? userActivityLogs 
             : [{ user: "System", action: "No activity yet", order: "N/A", timestamp: "N/A" }];
 
         const csvString = csvWriter.getHeaderString() + csvWriter.stringifyRecords(records);
 
-        // Force browser to treat this as a file download
         res.setHeader("Content-Type", "text/csv");
         res.setHeader("Content-Disposition", "attachment; filename=Ankit_MargDarshak_Activity.csv");
         
-        console.log(`Exporting ${userActivityLogs.length} activity records.`);
         res.status(200).send(csvString);
     } catch (err) {
         console.error("CSV Generation Error:", err);
         res.status(500).send("Failed to generate CSV");
+    }
+});
+
+/**
+ * 4. DEMO RESET (CRITICAL FOR HACKATHON)
+ * Purpose: Resets all orders to 'Pending' so you can repeat the demo.
+ * URL: https://margdarshak-4.onrender.com/api/demo/reset
+ */
+router.get('/demo/reset', async (req, res) => {
+    try {
+        // Reset all orders in MongoDB back to 'Pending'
+        await Delivery.updateMany({}, { status: 'Pending' });
+        
+        // Clear the in-memory activity logs
+        userActivityLogs = [];
+        
+        console.log("System Reset Performed.");
+        res.status(200).send(`
+            <div style="font-family: sans-serif; padding: 40px; text-align: center; background: #0B0F1A; color: white; height: 100vh;">
+                <h1 style="color: #0EA5E9;">System Reset Successful</h1>
+                <p>All orders are back to Pending. Activity logs cleared.</p>
+                <button onclick="window.close()" style="background: #0EA5E9; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Close Tab</button>
+            </div>
+        `);
+    } catch (err) {
+        res.status(500).json({ error: "Reset failed" });
     }
 });
 
