@@ -43,16 +43,15 @@ export default function App() {
     setIsAuthModalOpen(true);
   };
 
-  // FIXED: DOWNLOAD USER ACTIVITY CSV
+  // UPDATED: Points to your new live deployment (margdarshak-4)
   const downloadCSV = () => {
-    // MUST match the router.get name in api.js exactly
     window.open(
-      "https://margdarshak-3.onrender.com/api/download-activity-csv",
+      "https://margdarshak-4.onrender.com/api/download-activity-csv",
       "_blank"
     );
   };
 
-  // Function to call when a driver completes a delivery - Refreshes all tabs
+  // Triggers a refresh across all dashboard components
   const handleDataChange = () => {
     setRefreshKey(prev => prev + 1);
   };
@@ -72,7 +71,7 @@ export default function App() {
           !currentUser ? "blur-xl scale-95 pointer-events-none" : "blur-0 scale-100"
         }`}>
         <div className="max-w-[2000px] mx-auto">
-          {/* LOGO BAR */}
+          {/* TOP NAVIGATION BAR */}
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#1E293B]/50">
             <div className="relative h-20 w-64">
               <img src={logo} alt="Marg Darshak" className="h-full w-full object-contain object-left" />
@@ -98,7 +97,7 @@ export default function App() {
 
           <div className="text-center mb-8">
             <h1 className="text-white text-4xl mb-2 font-bold tracking-tight">Smart Parking & Micro Route Optimizer</h1>
-            <p className="text-gray-400 text-lg">Beyond Navigation. Towards Intelligence.</p>
+            <p className="text-gray-400 text-lg font-medium tracking-wide">Beyond Navigation. Towards Intelligence.</p>
           </div>
 
           <Tabs defaultValue="presentation" className="w-full">
