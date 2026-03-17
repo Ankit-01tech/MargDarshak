@@ -3,73 +3,106 @@ const router = express.Router();
 const Delivery = require("../models/Delivery"); 
 const createCsvWriter = require('csv-writer').createObjectCsvStringifier;
 
-// Shared memory for activity logs (resets if server restarts)
+// Shared memory for activity logs (This captures your clicks!)
 let userActivityLogs = [];
 
 /**
- * 1. GET DELIVERIES
- * URL: https://margdarshak-3.onrender.com/api/deliveries
+ * 1. GET ALL PENDING DELIVERIES
+ * This feeds your Priority Panel and Driver App.
+ * URL: https://margdarshak-4.onrender.com/api/deliveries
  */
 router.get('/deliveries', async (req, res) => {
     try {
+        // We only fetch 'Pending' or 'In Transit' so the UI updates live
         const data = await Delivery.find({ status: { $ne: 'Completed' } }); 
-        res.json(data);
+        res.status(200).json(data);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Fetch Error:", err);
+        res.status(500).json({ error: "Database fetch failed" });
     }
 });
 
 /**
- * 2. CONFIRM ARRIVAL
- * URL: https://margdarshak-3.onrender.com/api/delivery/confirm
+ * 2. CONFIRM ARRIVAL (The Sync Trigger)
+ * This is called when you click the button in the Driver App.
+ * URL: https://margdarshak-4.onrender.com/api/delivery/confirm
  */
 router.post('/delivery/confirm', async (req, res) => {
     const { orderId, driverName } = req.body;
+
+    if (!orderId) {
+        return res.status(400).json({ error: "Order ID is required" });
+    }
+
     try {
-        // Find and update status
-        const updatedDelivery = await Delivery.findOneAndUpdate(
+        // 1. Update the database status to 'Completed'
+        const updated = await Delivery.findOneAndUpdate(
             { orderId: orderId }, 
             { status: 'Completed' },
             { new: true }
         );
 
-        if (!updatedDelivery) {
-            return res.status(404).json({ error: "Order not found" });
+        if (!updated) {
+            return res.status(404).json({ error: "Order not found in MongoDB" });
         }
 
-        // Log this action for the CSV export
-        userActivityLogs.push({
+        // 2. Log the activity for the CSV Export
+        const logEntry = {
             user: driverName || "Ankit",
             action: "ARRIVED & CONFIRMED",
             order: orderId,
-            timestamp: new Date().toLocaleTimeString()
-        });
+            timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+        };
 
-        res.json({ success: true, message: "System Synced" });
+        userActivityLogs.push(logEntry);
+        
+        // This prints in your Render logs so you can see it working!
+        console.log("Activity Captured:", logEntry);
+
+        res.status(200).json({ 
+            success: true, 
+            message: `Order ${orderId} confirmed successfully.`,
+            currentLogs: userActivityLogs.length 
+        });
     } catch (err) {
-        res.status(500).json({ error: "Sync failed" });
+        console.error("Confirmation Error:", err);
+        res.status(500).json({ error: "Server sync failed" });
     }
 });
 
 /**
- * 3. DOWNLOAD CSV
- * URL: https://margdarshak-3.onrender.com/api/download-activity-csv
+ * 3. DOWNLOAD ACTIVITY CSV
+ * Generates the audit trail of all your "Confirm Arrival" clicks.
+ * URL: https://margdarshak-4.onrender.com/api/download-activity-csv
  */
 router.get("/download-activity-csv", (req, res) => {
-    const csvWriter = createCsvWriter({
-        header: [
-            { id: "user", title: "Operator" },
-            { id: "action", title: "Action" },
-            { id: "order", title: "Order ID" },
-            { id: "timestamp", title: "Time" }
-        ]
-    });
+    try {
+        const csvWriter = createCsvWriter({
+            header: [
+                { id: "user", title: "Operator" },
+                { id: "action", title: "Action" },
+                { id: "order", title: "Order ID" },
+                { id: "timestamp", title: "Time (IST)" }
+            ]
+        });
 
-    const csvString = csvWriter.getHeaderString() + csvWriter.stringifyRecords(userActivityLogs);
+        // Use recorded logs, or a placeholder if no one has clicked yet
+        const records = userActivityLogs.length > 0 
+            ? userActivityLogs 
+            : [{ user: "System", action: "No activity yet", order: "N/A", timestamp: "N/A" }];
 
-    res.header("Content-Type", "text/csv");
-    res.attachment("Ankit_MargDarshak_Logs.csv");
-    res.status(200).send(csvString);
+        const csvString = csvWriter.getHeaderString() + csvWriter.stringifyRecords(records);
+
+        // Force browser to treat this as a file download
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", "attachment; filename=Ankit_MargDarshak_Activity.csv");
+        
+        console.log(`Exporting ${userActivityLogs.length} activity records.`);
+        res.status(200).send(csvString);
+    } catch (err) {
+        console.error("CSV Generation Error:", err);
+        res.status(500).send("Failed to generate CSV");
+    }
 });
 
 module.exports = router;
