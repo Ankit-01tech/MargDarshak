@@ -172,11 +172,11 @@ export function AdminDashboard() {
             <Navigation className="w-4 h-4 text-[#0EA5E9]" /> Fleet Geospatial View
           </h3>
           {/* Map height is fixed to match the side column */}
-          <div ref={mapRef} className="h-[775px] rounded-lg overflow-hidden brightness-100 contrast-100" />
+          <div ref={mapRef} className="h-[680px] rounded-lg overflow-hidden brightness-100 contrast-100" />
         </Card>
 
         {/* Side Column (Balanced Heights) */}
-        <div className="flex flex-col gap-6 h-[870px]">
+        <div className="flex flex-col gap-6 h-[680px]">
             {/* Congestion Card */}
             <Card className="bg-[#0F1829] border-[#1E293B] p-5 flex flex-col flex-1">
                 <h3 className="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">

@@ -128,7 +128,7 @@ export function DriverMobileApp({ currentUser, onStatusChange }: DriverProps) {
 
       {/* 🎴 Floating Order Card: Adjusted height & padding */}
       <div className="absolute bottom-6 left-0 right-0 z-30 p-4">
-        <Card className="bg-[#0F1829]/95 backdrop-blur-3xl border-[#1E293B] p-8 rounded-[2.5rem] shadow-3xl">
+        <Card className="bg-[#0F1829]/95 backdrop-blur-3xl border-[#1E293B] p-4 rounded-[2.5rem] shadow-3xl">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-[#00FF88] animate-ping" />
