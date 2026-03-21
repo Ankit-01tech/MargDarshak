@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { TrendingUp, Clock, Droplet, Leaf, Navigation, AlertCircle, Activity, Globe } from 'lucide-react';
+import { TrendingUp, Clock, Droplet, Leaf, Navigation, AlertCircle, Activity } from 'lucide-react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 export function AdminDashboard() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
   
   const [trafficData, setTrafficData] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
@@ -19,7 +18,7 @@ export function AdminDashboard() {
     co2Reduction: "8.4kg"
   });
 
-  // 1. LIVE ENGINE: Generates Chart Data & System Logs
+  // 1. LIVE ENGINE: Data & Logs Simulation
   useEffect(() => {
     const generateInitialData = () => {
       const points = [];
@@ -33,7 +32,6 @@ export function AdminDashboard() {
     };
     generateInitialData();
 
-    // Simulation for Live Logs
     const logActions = [
       "ORD-1001: Approaching Gateway Hub",
       "BKC Cluster: High Congestion Alert",
@@ -44,9 +42,8 @@ export function AdminDashboard() {
 
     const interval = setInterval(() => {
       const newLog = `[${new Date().toLocaleTimeString()}] ${logActions[Math.floor(Math.random() * logActions.length)]}`;
-      setLogs(prev => [newLog, ...prev].slice(0, 6));
+      setLogs(prev => [newLog, ...prev].slice(0, 8)); // Increased log count to fill space
       
-      // Update chart slightly to look "Live"
       setTrafficData(prev => {
         const newData = [...prev.slice(1), { 
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
@@ -59,7 +56,7 @@ export function AdminDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  // 2. DATA SYNC: Fetching Real Assets
+  // 2. DATA SYNC: API Fetch
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -76,17 +73,14 @@ export function AdminDashboard() {
           { name: "Fleet-B2", status: 'parking', lat: 19.030, lng: 72.850 }
         ]);
         if(sData.onTimeDelivery) setStats(sData);
-      } catch (e) {
-        console.error("API Sync Error:", e);
-      }
+      } catch (e) { console.error("API Sync Error:", e); }
     };
     fetchData();
   }, []);
 
-  // 3. MAP ENGINE: Leaflet Initialization with InvalidateSize fix
+  // 3. MAP ENGINE: Leaflet Fixes
   useEffect(() => {
     if (!mapRef.current) return;
-
     const initMap = async () => {
       const L = await import('leaflet');
       if (mapInstanceRef.current) mapInstanceRef.current.remove();
@@ -100,7 +94,6 @@ export function AdminDashboard() {
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
       mapInstanceRef.current = map;
 
-      // Render Vehicle Markers
       vehicles.forEach((v) => {
         const color = v.status === 'active' ? '#00FF88' : '#F59E0B';
         const icon = L.divIcon({
@@ -109,17 +102,15 @@ export function AdminDashboard() {
         });
         L.marker([v.lat, v.lng], { icon }).addTo(map);
       });
-
       setTimeout(() => map.invalidateSize(), 500);
     };
-
     initMap();
   }, [vehicles]);
 
   return (
     <div className="w-full max-w-[1440px] h-screen bg-[#0B0F1A] p-8 overflow-auto mx-auto border border-[#1E293B] no-scrollbar">
       
-      {/* Header Section */}
+      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <div className="flex items-center gap-3">
@@ -141,7 +132,7 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      {/* KPI Stats Grid */}
+      {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[
           { label: 'On-Time Rate', val: stats.onTimeDelivery, icon: TrendingUp, color: 'text-[#0EA5E9]' },
@@ -155,16 +146,14 @@ export function AdminDashboard() {
               <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
             </div>
             <p className="text-white text-3xl font-bold mt-2 font-mono z-10 relative">{kpi.val}</p>
-            <div className={`absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity`}>
-                <kpi.icon className="w-24 h-24" />
-            </div>
           </Card>
         ))}
       </div>
 
+      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Map Display Card */}
+        {/* Map Display (Primary Focus) */}
         <Card className="lg:col-span-2 bg-[#0F1829] border-[#1E293B] p-4 relative">
           <div className="absolute top-8 right-8 z-[50] space-y-2">
             <div className="bg-black/80 backdrop-blur-md p-3 rounded-xl border border-white/10 shadow-2xl">
@@ -182,12 +171,14 @@ export function AdminDashboard() {
           <h3 className="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
             <Navigation className="w-4 h-4 text-[#0EA5E9]" /> Fleet Geospatial View
           </h3>
-          <div ref={mapRef} className="h-[480px] rounded-lg overflow-hidden grayscale brightness-90 contrast-125" />
+          {/* Map height is fixed to match the side column */}
+          <div ref={mapRef} className="h-[775px] rounded-lg overflow-hidden brightness-100 contrast-100" />
         </Card>
 
-        {/* Data & Logs Column */}
-        <div className="flex flex-col gap-6">
-            <Card className="bg-[#0F1829] border-[#1E293B] p-5 flex flex-col h-[240px]">
+        {/* Side Column (Balanced Heights) */}
+        <div className="flex flex-col gap-6 h-[870px]">
+            {/* Congestion Card */}
+            <Card className="bg-[#0F1829] border-[#1E293B] p-5 flex flex-col flex-1">
                 <h3 className="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
                     <Activity className="w-4 h-4 text-red-500" /> Congestion Trends
                 </h3>
@@ -201,30 +192,27 @@ export function AdminDashboard() {
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
-                            <Tooltip 
-                                contentStyle={{ background: '#0F1829', border: '1px solid #1E293B', fontSize: '10px' }} 
-                                itemStyle={{ color: '#EF4444' }}
-                            />
+                            <Tooltip contentStyle={{ background: '#0F1829', border: '1px solid #1E293B', fontSize: '10px' }} />
                             <Area type="monotone" dataKey="congestion" stroke="#EF4444" fill="url(#chartGradient)" strokeWidth={3} />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
             </Card>
 
-            <Card className="bg-[#0F1829] border-[#1E293B] p-5 h-[288px] flex flex-col">
+            {/* Activity Logs Card */}
+            <Card className="bg-[#0F1829] border-[#1E293B] p-5 flex flex-col flex-1">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
                         <AlertCircle className="w-4 h-4 text-[#F59E0B]" /> Activity Logs
                     </h3>
                     <div className="w-2 h-2 rounded-full bg-[#00FF88] animate-ping" />
                 </div>
-                <div className="space-y-3 overflow-hidden">
+                <div className="space-y-3 overflow-y-auto no-scrollbar">
                     {logs.map((log, i) => (
                         <div key={i} className="text-[10px] font-mono text-gray-500 border-l-2 border-[#1E293B] pl-4 py-1.5 hover:text-gray-300 transition-colors">
                             {log}
                         </div>
                     ))}
-                    {logs.length === 0 && <p className="text-gray-700 text-[10px] font-mono">Initializing uplink...</p>}
                 </div>
             </Card>
         </div>
