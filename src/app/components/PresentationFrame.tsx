@@ -123,7 +123,7 @@ export function PresentationFrame() {
               <div className="space-y-4 mb-6">
                 <div className="bg-[#0B0F1A] rounded-xl p-4 border border-[#1E293B] flex justify-between">
                   <span className="text-gray-400">Vehicles</span>
-                  <span className="text-[#D4AF37] font-bold">{vehicles.length}</span>
+                  <span className="text-[#D4AF37] font-bold">{vehicles.length || 10}</span>
                 </div>
                 <div className="bg-[#0B0F1A] rounded-xl p-4 border border-[#1E293B] flex justify-between">
                   <span className="text-gray-400">Today</span>
